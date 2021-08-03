@@ -1,47 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
-import React, { useState } from 'react'
-import StripeCheckout from 'react-stripe-checkout'
+import React from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import CheckoutForm from "./CheckoutForm";
+import "./App.css";
 
-function App() {
-  console.log(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
-  const [product, setProduct] = useState({
-    name: 'Basic Plan',
-    price: 1
-  })
+// Make sure to call loadStripe outside of a component’s render to avoid
+// recreating the Stripe object on every render.
+// loadStripe is initialized with your real test publishable API key.
+const promise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-  const makePayment = (token) => {
-    const body = {
-      token,
-      product
-    }
-    const headers = {
-      'Content-Type': 'application/json'
-    }
-
-    return fetch(`http://localhost:5000/payment`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    }).then((res) => console.log({ res })).catch((err) => console.log(err))
-  }
-
+export default function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Learning stripe
-        </p>
-        <StripeCheckout
-          stripeKey={process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY}
-          token={makePayment}
-          name={`Buy Plan at $ ${product.price}`}
-          amount={product.price * 100}
-        />
-      </header>
+      <Elements stripe={promise}>
+        <CheckoutForm />
+      </Elements>
     </div>
   );
 }
-
-export default App;

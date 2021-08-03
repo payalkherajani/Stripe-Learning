@@ -15,22 +15,32 @@ app.get('/', (req, res) => {
     res.send("Hello World")
 })
 
-app.post('/payment', (req, res) => {
-    const { product, token } = req.body;
-    console.log("PRODUCT", product);
-    const idempontencyKey = uuidv4()
-    return stripe.customers.create({
-        email: token.email,
-        source: token.id
-    }).then(customer => {
-        stripe.charges.create({
-            amount: product.price * 100,
-            currency: 'usd',
-            customer: customer.id,
-            receipt_email: token.email,
-            description: product.name
-        }, { idempontencyKey })
-    }).then((result) => res.status(200).json(result)).catch((err) => console.log(err))
+app.post('/pay', async (req, res) => {
+    const { email, name, address } = req.body;
+    console.log({ email, name, address })
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        shipping: {
+            name: name,
+            address: {
+                line1: '510 Townsend St',
+                postal_code: '98140',
+                city: 'San Francisco',
+                state: 'CA',
+                country: 'US',
+            }
+        },
+        amount: 1 * 1000,
+        currency: 'usd',
+        // Verify your integration in this guide by including this parameter
+        metadata: { integration_check: 'accept_a_payment' },
+        description: 'Software development services',
+        receipt_email: email,
+    });
+
+    console.log({ paymentIntent })
+
+    res.json({ 'client_secret': paymentIntent['client_secret'] })
 })
 
 const PORT = process.env.PORT || 5000
