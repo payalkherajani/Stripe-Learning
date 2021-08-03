@@ -77,13 +77,45 @@ export default function CheckoutForm() {
         const { name, value } = e.target;
         setUserData({ ...userData, [name]: value })
     }
+    const handleSubmitSubscription = async (e) => {
+        e.preventDefault()
+        setProcessing(true);
+
+        const result = await stripe.createPaymentMethod({
+            type: 'card',
+            card: elements.getElement(CardElement),
+            billing_details: {
+                email: email,
+            },
+        });
+        console.log({ result })
+        if (result.error) {
+            console.log(result.error.message);
+        } else {
+            const res = await axios.post('http://localhost:5000/sub', { 'payment_method': result.paymentMethod.id, 'email': email, priceId: 'price_1JKHN5SHyZP6jAxs9IkqOUBe' }); //Currently it is of Premium plan! This is for basic plan id 'price_1JKHLgSHyZP6jAxsO1odGaqk'
+            if (res.status === 200) {
+                const response = await stripe.confirmCardPayment(res.data.clientSecret)
+                console.log({ response })
+            } else {
+                console.log("No action is required something failed")
+            }
+        }
+    }
     return (
         <form id="payment-form" onSubmit={handleSubmit}>
             <input type="email" value={email} onChange={formDataHandler} placeholder="Email" required name="email" />
             <input type="text" value={name} onChange={formDataHandler} placeholder="Name" required name="name" />
             <input type="text" value={address} onChange={formDataHandler} placeholder="Address" required name="address" />
             <CardElement id="card-element" options={cardStyle} onChange={handleChange} />
-            <button
+            <button onClick={handleSubmitSubscription}>
+                Subscription
+            </button>
+        </form>
+    );
+}
+
+
+{/* <button
                 disabled={processing || disabled || succeeded}
                 id="submit"
             >
@@ -94,23 +126,20 @@ export default function CheckoutForm() {
                         "Pay now"
                     )}
                 </span>
-            </button>
-            {/* Show any error that happens when processing the payment */}
-            {error && (
-                <div className="card-error" role="alert">
-                    {error}
-                </div>
-            )}
-            {/* Show a success message upon completion */}
-            <p className={succeeded ? "result-message" : "result-message hidden"}>
-                Payment succeeded, see the result in your
-                <a
-                    href={`https://dashboard.stripe.com/test/payments`}
-                >
-                    {" "}
-                    Stripe dashboard.
-                </a> Refresh the page to pay again.
-            </p>
-        </form>
-    );
-}
+            </button> */}
+{/* Show any error that happens when processing the payment */ }
+// {error && (
+//     <div className="card-error" role="alert">
+//         {error}
+//     </div>
+// )}
+{/* Show a success message upon completion */ }
+            // <p className={succeeded ? "result-message" : "result-message hidden"}>
+            //     Payment succeeded, see the result in your
+            //     <a
+            //         href={`https://dashboard.stripe.com/test/payments`}
+            //     >
+            //         {" "}
+            //         Stripe dashboard.
+            //     </a> Refresh the page to pay again.
+            // </p>
