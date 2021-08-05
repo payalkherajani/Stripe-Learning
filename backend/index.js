@@ -45,10 +45,10 @@ app.post('/pay', async (req, res) => {
 
 app.post('/sub', async (req, res) => {
     try {
-        const { email, payment_method, priceId } = req.body;
+        const { email, payment_method, priceId, name } = req.body;
 
         const customer = await stripe.customers.create({
-            name: 'TEST',
+            name: name,
             address: {
                 line1: '510 Townsend St',
                 postal_code: '98140',

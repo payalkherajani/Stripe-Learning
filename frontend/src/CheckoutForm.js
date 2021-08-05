@@ -92,7 +92,7 @@ export default function CheckoutForm() {
         if (result.error) {
             console.log(result.error.message);
         } else {
-            const res = await axios.post('http://localhost:5000/sub', { 'payment_method': result.paymentMethod.id, 'email': email, priceId: 'price_1JKHN5SHyZP6jAxs9IkqOUBe' }); //Currently it is of Premium plan! This is for basic plan id 'price_1JKHLgSHyZP6jAxsO1odGaqk'
+            const res = await axios.post('http://localhost:5000/sub', { 'payment_method': result.paymentMethod.id, 'email': email, priceId: 'price_1JKHN5SHyZP6jAxs9IkqOUBe', name }); //Currently it is of Premium plan! This is for basic plan id 'price_1JKHLgSHyZP6jAxsO1odGaqk'
             if (res.status === 200) {
                 const response = await stripe.confirmCardPayment(res.data.clientSecret)
                 console.log({ response })
